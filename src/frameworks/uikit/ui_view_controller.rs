@@ -6,7 +6,7 @@
 //! `UIViewController`.
 //!
 //! Resources:
-//! - [View Controller Programming Guide for iOS (Legacy)](https://developer.apple.com/library/archive/documentation/WindowsViews/Conceptual/ViewControllerPGforiOSLegacy/BasicViewControllers/BasicViewControllers.html)
+//! - [View Controller Programming Guide for iOS (Legacy)](https://developer.apple.com/library/archive/documentation/WindowsViews/Conceptual/ViewControllerPGforiOSLegacy/BasicViewControllers/BasicView[...]
 
 use crate::frameworks::core_graphics::CGRect;
 use crate::frameworks::foundation::ns_objc_runtime::NSStringFromClass;
@@ -33,6 +33,8 @@ struct UIViewControllerHostObject {
     /// of the nib by name, may be nil.
     /// `NSBundle*`
     bundle: id,
+    /// Whether view controller wants full screen layout
+    wants_full_screen_layout: bool,
 }
 impl HostObject for UIViewControllerHostObject {}
 
@@ -175,6 +177,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (())dismissModalViewControllerAnimated:(bool)animated {
     log!("TODO: [(UIViewController*){:?} dismissModalViewControllerAnimated:{}]", this, animated); // TODO
+}
+
+/// Setter for `wantsFullScreenLayout` property.
+/// Stores the requested value in the host object and logs the change.
+- (())setWantsFullScreenLayout:(bool)wants {
+    env.objc.borrow_mut::<UIViewControllerHostObject>(this).wants_full_screen_layout = wants;
+    log_dbg!("[(UIViewController*){:?} setWantsFullScreenLayout:{}]", this, wants);
 }
 
 @end
