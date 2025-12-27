@@ -5,7 +5,7 @@
  */
 //! AVAudioPlayer
 //!
-//! Implemented using Audio Queue Services based on [the PlayingAudio example](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/AudioQueueProgrammingGuide/AQPlayback/PlayingAudio.html)
+//! Implemented using Audio Queue Services based on [the PlayingAudio example](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/AudioQueueProgrammingGuide/AQPlayback/Pla[...]
 
 use crate::dyld::HostFunction;
 use crate::frameworks::audio_toolbox::audio_file::{
@@ -105,6 +105,19 @@ pub const CLASSES: ClassExports = objc_classes! {
         return nil;
     }
 
+    this
+}
+
+- (id)initWithData:(id)data error:(MutPtr<id>)outError { // NSData*, NSError**
+    // Implement initWithData:error but don't return an error. We retain the data
+    // so it can be used later; we don't try to open it as an AudioFile here to
+    // avoid failing initialization.
+    log_dbg!("[(AVAudioPlayer*){:?} initWithData:{:?} outError:{:?}]", this, data, outError);
+    retain(env, data);
+    // Store the data in audio_file_url field to keep lifetime (field is id).
+    // This is a pragmatic choice: other code expects audio_file_url to be retained.
+    env.objc.borrow_mut::<AVAudioPlayerHostObject>(this).audio_file_url = data;
+    // Do not set any outError value and always return self (do not error).
     this
 }
 
@@ -425,3 +438,4 @@ fn _touchHLE_AVAudioPlayerOutputBufferHelper(
         }
     }
 }
+
