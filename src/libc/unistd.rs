@@ -145,7 +145,10 @@ fn readlink(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<u8>, bufsiz: 
 
     match env.fs.read_link(guest_path) {
         Ok(target) => {
-            let bytes = target.as_bytes();
+            // target's concrete type can vary (PathBuf, String, etc.). Convert to a String
+            // representation and use its bytes so the compiler doesn't need to infer the exact type.
+            let target_string = format!("{}", target);
+            let bytes = target_string.as_bytes();
             // convert bufsiz to usize for min calculation
             let bufsiz_usize: usize = bufsiz.try_into().unwrap();
             let to_copy = std::cmp::min(bytes.len(), bufsiz_usize);
