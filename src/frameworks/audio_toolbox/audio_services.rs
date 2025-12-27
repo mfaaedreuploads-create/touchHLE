@@ -53,7 +53,7 @@ fn AudioServicesPlayAlertSound(env: &mut Environment, in_system_sound_id: System
 }
 
 fn AudioServicesCreateSystemSoundID(
-    _env: &mut Environment,
+    env: &mut Environment,
     _in_file_url: crate::mem::ConstVoidPtr,
     out_system_sound_id: MutPtr<SystemSoundID>,
 ) -> OSStatus {
@@ -64,12 +64,8 @@ fn AudioServicesCreateSystemSoundID(
     }
 
     let id = SOUND_ID_COUNTER.fetch_add(1, Ordering::SeqCst);
-    unsafe {
-        // Use the MutPtr API to write the generated id into the caller-provided pointer.
-        // MutPtr does not implement Deref to a raw reference, so avoid `*out_system_sound_id = id`.
-        // Prefer the provided write method on the pointer wrapper (or equivalent).
-        out_system_sound_id.write(id);
-    }
+    // Write the generated id into guest memory via the environment's Mem API.
+    env.mem.write(out_system_sound_id, id);
     0 // noErr
 }
 
