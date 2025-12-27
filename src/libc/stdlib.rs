@@ -33,6 +33,10 @@ pub struct div_t {
     pub rem: i32,
 }
 
+// Implement GuestRet so div_t can be returned from guest-called functions.
+// If GuestRet requires additional methods later, implement them here.
+impl GuestRet for div_t {}
+
 // Sizes of zero are implementation-defined. macOS will happily give you back
 // an allocation for any of these, so presumably iPhone OS does too.
 // (touchHLE's allocator will round up allocations to at least 16 bytes.)
@@ -502,7 +506,6 @@ fn system(env: &mut Environment, cmd: ConstPtr<u8>) -> i32 {
     todo!()
 }
 
-/// C div() implementation returning div_t by value.
 fn div(env: &mut Environment, numer: i32, denom: i32) -> div_t {
     // TODO: handle errno properly
     set_errno(env, 0);
