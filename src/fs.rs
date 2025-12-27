@@ -4,7 +4,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 //! Virtual filesystem, or "guest filesystem".
-!
 //! This lets us put files and directories where the guest app expects them to
 //! be, without constraining the layout of the host filesystem.
 //!
