@@ -25,6 +25,14 @@ pub struct State {
     arc4random: u32,
 }
 
+// Representation of C's div_t
+#[repr(C)]
+#[derive(Copy, Clone, Default, Debug)]
+pub struct div_t {
+    pub quot: i32,
+    pub rem: i32,
+}
+
 // Sizes of zero are implementation-defined. macOS will happily give you back
 // an allocation for any of these, so presumably iPhone OS does too.
 // (touchHLE's allocator will round up allocations to at least 16 bytes.)
@@ -494,6 +502,25 @@ fn system(env: &mut Environment, cmd: ConstPtr<u8>) -> i32 {
     todo!()
 }
 
+/// C div() implementation returning div_t by value.
+fn div(env: &mut Environment, numer: i32, denom: i32) -> div_t {
+    // TODO: handle errno properly
+    set_errno(env, 0);
+
+    if denom == 0 {
+        log!("Warning: div({}, 0) called — division by zero", numer);
+        // Undefined in C. Return quot 0 and rem = numer as a conservative value.
+        return div_t {
+            quot: 0,
+            rem: numer,
+        };
+    }
+    div_t {
+        quot: numer / denom,
+        rem: numer % denom,
+    }
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(malloc(_)),
     export_c_func!(malloc_size(_)),
@@ -523,6 +550,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(mbstowcs(_, _, _)),
     export_c_func!(wcstombs(_, _, _)),
     export_c_func!(system(_)),
+    export_c_func!(div(_, _)),
 ];
 
 /// A simple wrapper around [atof_inner_generic] for the case of C string.
