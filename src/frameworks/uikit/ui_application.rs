@@ -22,6 +22,7 @@ pub struct State {
     /// [UIApplication sharedApplication]
     shared_application: Option<id>,
     pub(super) status_bar_hidden: bool,
+    pub(super) status_bar_style: NSInteger,
 }
 
 struct UIApplicationHostObject {
@@ -89,6 +90,15 @@ pub const CLASSES: ClassExports = objc_classes! {
                 animated:(bool)_animated {
     // TODO: animation
     msg![env; this setStatusBarHidden:hidden]
+}
+
+- (())setStatusBarStyle:(NSInteger)style {
+    // Store the requested style so other parts of the system can query it if needed.
+    env.framework_state.uikit.ui_application.status_bar_style = style;
+}
+- (())setStatusBarStyle:(NSInteger)style animated:(bool)_animated {
+    // TODO: animation - for now forward to the non-animated setter.
+    msg![env; this setStatusBarStyle:style]
 }
 
 - (UIInterfaceOrientation)statusBarOrientation {
