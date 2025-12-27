@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 //! Virtual filesystem, or "guest filesystem".
-//!
+!
 //! This lets us put files and directories where the guest app expects them to
 //! be, without constraining the layout of the host filesystem.
 //!
@@ -351,7 +351,7 @@ fn handle_open_err<T, E: std::fmt::Display, P: std::fmt::Debug>(
 ) -> T {
     match open_result {
         Ok(ok) => ok,
-        Err(e) => panic!("Unexpected I/O failure when trying to access real path {host_path:?}: {e}. This might indicate that files needed by touchHLE are missing, or were moved while it was running."),
+        Err(e) => panic!("Unexpected I/O failure when trying to access real path {host_path:?}: {e}. This might indicate that files needed by touchHLE are missing, or were moved while it was runn[...]
     }
 }
 
@@ -1213,5 +1213,24 @@ impl Fs {
             },
         );
         Ok(())
+    }
+
+    /// Read the target of a symbolic link at the given guest path.
+    ///
+    /// Returns Ok(PathBuf) containing the symlink target (host path) if the
+    /// guest node corresponds to a host-backed file and reading the link
+    /// succeeds. Returns Err(()) otherwise.
+    pub fn read_link<P: AsRef<GuestPath>>(&self, path: P) -> Result<PathBuf, ()> {
+        let node = self.lookup_node(path.as_ref()).ok_or(())?;
+        match node {
+            FsNode::File { location, .. } => match location {
+                FileLocation::Path(host_path) => {
+                    std::fs::read_link(host_path).map_err(|_| ())
+                }
+                // Cannot readlink inside ipa/resource items
+                _ => Err(()),
+            },
+            _ => Err(()),
+        }
     }
 }
