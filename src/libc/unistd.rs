@@ -130,6 +130,45 @@ fn getpagesize(_env: &mut Environment) -> i32 {
     PAGE_SIZE.try_into().unwrap()
 }
 
+/// readlink(2) - read the target of a symbolic link
+///
+/// Returns the number of bytes placed in `buf` (no terminating NUL),
+/// or -1 on error.
+fn readlink(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<u8>, bufsiz: GuestUSize) -> i32 {
+    // TODO: handle errno properly
+    set_errno(env, 0);
+
+    log_dbg!("readlink({:?} '{:?}', buf={:?}, bufsiz={})", path, env.mem.cstr_at_utf8(path), buf, bufsiz);
+
+    let path_str = env.mem.cstr_at_utf8(path).unwrap();
+    let guest_path = GuestPath::new(&path_str);
+
+    match env.fs.read_link(guest_path) {
+        Ok(target) => {
+            let bytes = target.as_bytes();
+            // convert bufsiz to usize for min calculation
+            let bufsiz_usize: usize = bufsiz.try_into().unwrap();
+            let to_copy = std::cmp::min(bytes.len(), bufsiz_usize);
+            if to_copy > 0 {
+                let to_copy_guest: GuestUSize = to_copy.try_into().unwrap();
+                env.mem
+                    .bytes_at_mut(buf, to_copy_guest)
+                    .copy_from_slice(&bytes[..to_copy]);
+            }
+            // readlink does NOT append a NUL terminator
+            to_copy as i32
+        }
+        Err(_) => {
+            log!(
+                "readlink({:?} '{:?}') failed",
+                path,
+                env.mem.cstr_at_utf8(path)
+            );
+            -1
+        }
+    }
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sleep(_)),
     export_c_func!(usleep(_)),
@@ -141,4 +180,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(gethostname(_, _)),
     export_c_func!(getpagesize()),
     export_c_func!(getgid()),
+    export_c_func!(readlink(_, _, _)),
 ];
