@@ -2,9 +2,9 @@ name: Build touchHLE
 
 on:
   push:
-    branches: [ "trunk" ]
+    branches: [ "UNOFFICIAL-2" ]
   pull_request:
-    branches: [ "trunk" ]
+    branches: [ "UNOFFICIAL-2" ]
 
 env:
   CARGO_TERM_COLOR: always
