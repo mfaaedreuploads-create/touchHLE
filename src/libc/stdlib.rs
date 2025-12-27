@@ -5,7 +5,7 @@
  */
 //! `stdlib.h`
 
-use crate::abi::{CallFromHost, GuestFunction};
+use crate::abi::{CallFromHost, GuestRet, GuestFunction};
 use crate::dyld::{export_c_func, export_c_func_aliased, FunctionExports};
 use crate::fs::{resolve_path, GuestPath};
 use crate::libc::clocale::{setlocale, LC_CTYPE};
