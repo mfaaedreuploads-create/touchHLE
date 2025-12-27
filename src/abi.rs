@@ -7,7 +7,7 @@
 //! calling conventions.
 //!
 //! Useful resources:
-//! * Apple's [Writing ARMv6 code for iOS](https://developer.apple.com/documentation/xcode/writing-armv6-code-for-ios), read together with Arm's [Procedure Call Standard for the Arm Architecture (AAPCS32)](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst).
+//! * Apple's [Writing ARMv6 code for iOS](https://developer.apple.com/documentation/xcode/writing-armv6-code-for-ios), read together with Arm's [Procedure Call Standard for the Arm Architecture (AAPC[...]
 //!
 //! See also: [crate::mem::SafeRead] and [crate::mem::SafeWrite].
 
@@ -572,23 +572,35 @@ pub trait GuestRet: std::fmt::Debug + Sized {
     /// Read the return value from registers.
     fn from_regs(regs: &[u32]) -> Self {
         let _ = regs;
-        panic!()
+        panic!(
+            "GuestRet::from_regs called for {} — implement GuestRet for this type",
+            core::any::type_name::<Self>()
+        )
     }
     /// Write the return value to registers.
     fn to_regs(self, regs: &mut [u32]) {
         let _ = regs;
-        panic!()
+        panic!(
+            "GuestRet::to_regs called for {} — implement GuestRet for this type",
+            core::any::type_name::<Self>()
+        )
     }
 
     /// Read the return value from memory.
     fn from_mem(ptr: ConstVoidPtr, mem: &Mem) -> Self {
         let _ = (ptr, mem);
-        panic!()
+        panic!(
+            "GuestRet::from_mem called for {} — implement GuestRet for this type",
+            core::any::type_name::<Self>()
+        )
     }
     /// Write the return value to memory.
     fn to_mem(self, ptr: MutVoidPtr, mem: &mut Mem) {
         let _ = (ptr, mem);
-        panic!()
+        panic!(
+            "GuestRet::to_mem called for {} — implement GuestRet for this type",
+            core::any::type_name::<Self>()
+        )
     }
 }
 
