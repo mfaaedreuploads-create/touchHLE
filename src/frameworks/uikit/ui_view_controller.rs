@@ -179,8 +179,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: [(UIViewController*){:?} dismissModalViewControllerAnimated:{}]", this, animated); // TODO
 }
 
-/// Setter for `wantsFullScreenLayout` property.
-/// Stores the requested value in the host object and logs the change.
 - (())setWantsFullScreenLayout:(bool)wants {
     env.objc.borrow_mut::<UIViewControllerHostObject>(this).wants_full_screen_layout = wants;
     log_dbg!("[(UIViewController*){:?} setWantsFullScreenLayout:{}]", this, wants);
