@@ -351,7 +351,12 @@ fn handle_open_err<T, E: std::fmt::Display, P: std::fmt::Debug>(
 ) -> T {
     match open_result {
         Ok(ok) => ok,
-        Err(e) => panic!("Unexpected I/O failure when trying to access real path {host_path:?}: {e}. This might indicate that files needed by touchHLE are missing, or were moved while it was runn[...]
+        Err(e) => panic!(
+            "Unexpected I/O failure when trying to access real path {:?}: {}. \
+             This might indicate that files needed by touchHLE are missing, \
+             have incorrect permissions, or were moved while it was running.",
+            host_path, e
+        ),
     }
 }
 
