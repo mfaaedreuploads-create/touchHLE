@@ -65,8 +65,10 @@ fn AudioServicesCreateSystemSoundID(
 
     let id = SOUND_ID_COUNTER.fetch_add(1, Ordering::SeqCst);
     unsafe {
-        // Treat MutPtr<T> as a raw pointer; write the generated id.
-        *out_system_sound_id = id;
+        // Use the MutPtr API to write the generated id into the caller-provided pointer.
+        // MutPtr does not implement Deref to a raw reference, so avoid `*out_system_sound_id = id`.
+        // Prefer the provided write method on the pointer wrapper (or equivalent).
+        out_system_sound_id.write(id);
     }
     0 // noErr
 }
