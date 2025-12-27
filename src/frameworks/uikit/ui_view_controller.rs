@@ -73,7 +73,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())dealloc {
-    let &UIViewControllerHostObject { view, nib_name, bundle } = env.objc.borrow(this);
+    let &UIViewControllerHostObject { view, nib_name, bundle, wants_full_screen_layout } = env.objc.borrow(this);
 
     release(env, view);
     release(env, nib_name);
